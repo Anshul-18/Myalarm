@@ -36,6 +36,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedTabIndex = 0;
   final PageController _pageController = PageController();
   static const platform = MethodChannel('flutter_alarmapp/alarm');
+  final GlobalKey<TimerPageState> _timerPageKey = GlobalKey<TimerPageState>();
 
   @override
   void initState() {
@@ -254,6 +255,7 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           TimerPage(
+            key: _timerPageKey,
             selectedIndex: _selectedTabIndex,
             onNavigate: (index) {
               _pageController.animateToPage(

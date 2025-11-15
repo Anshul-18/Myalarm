@@ -62,6 +62,14 @@ class MainActivity: FlutterActivity() {
                     AlarmReceiver.stopAlarm()
                     result.success(true)
                 }
+                "playTimerAlarm" -> {
+                    AlarmReceiver.playAlarm(this)
+                    result.success(true)
+                }
+                "stopTimerAlarm" -> {
+                    AlarmReceiver.stopAlarm()
+                    result.success(true)
+                }
                 else -> result.notImplemented()
             }
         }

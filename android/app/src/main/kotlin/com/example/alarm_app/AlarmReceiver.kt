@@ -22,6 +22,41 @@ class AlarmReceiver : BroadcastReceiver() {
             wakeLock?.release()
             wakeLock = null
         }
+        
+        fun playAlarm(context: Context) {
+            try {
+                // Stop any existing alarm first
+                stopAlarm()
+                
+                // Set audio stream to ALARM
+                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                
+                // Play alarm sound
+                val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                ringtone = RingtoneManager.getRingtone(context, alarmUri)
+                
+                // Set audio attributes for alarm stream
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ringtone?.audioAttributes = android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                } else {
+                    @Suppress("DEPRECATION")
+                    ringtone?.streamType = AudioManager.STREAM_ALARM
+                }
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ringtone?.isLooping = true
+                }
+                
+                ringtone?.play()
+                Log.d("AlarmReceiver", "Playing timer alarm sound with URI: $alarmUri")
+            } catch (e: Exception) {
+                Log.e("AlarmReceiver", "Error playing timer alarm: ${e.message}")
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
