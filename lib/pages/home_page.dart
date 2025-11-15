@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'add_alarm_page.dart';
 import 'alarm_ringing_page.dart';
+import 'stopwatch_page.dart';
 import '../services/alarm_service.dart';
 import '../main.dart';
 
@@ -33,6 +34,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<AlarmInfo> alarms = [];
   int _selectedTabIndex = 0;
+  final PageController _pageController = PageController();
   static const platform = MethodChannel('flutter_alarmapp/alarm');
 
   @override
@@ -40,6 +42,12 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     AlarmService.initialize();
     _setupAlarmListener();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _setupAlarmListener() {
@@ -226,6 +234,34 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedTabIndex = index;
+          });
+        },
+        children: [
+          _buildAlarmPage(),
+          StopwatchPage(
+            selectedIndex: _selectedTabIndex,
+            onNavigate: (index) {
+              _pageController.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+          ),
+          _buildTimerPage(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAlarmPage() {
+    return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
@@ -325,6 +361,40 @@ class _HomePageState extends State<HomePage> {
                 child: const Icon(Icons.add, color: Colors.white, size: 28),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimerPage() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: const Text(
+          'Timer',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          const Center(
+            child: Text(
+              'Timer - Coming soon!',
+              style: TextStyle(color: Colors.white70, fontSize: 18),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildBottomNavigation(),
           ),
         ],
       ),
@@ -480,7 +550,6 @@ class _HomePageState extends State<HomePage> {
             children: [
               _buildNavItem(Icons.alarm, 'Alarm', 0),
               _buildNavItem(Icons.timer_outlined, 'Stopwatch', 1),
-              const SizedBox(width: 60), // Space for FAB
               _buildNavItem(Icons.hourglass_empty, 'Timer', 2),
             ],
           ),
@@ -493,28 +562,11 @@ class _HomePageState extends State<HomePage> {
     final isSelected = _selectedTabIndex == index;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedTabIndex = index;
-        });
-        if (index == 1) {
-          // Stopwatch
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Stopwatch - Coming soon!'),
-              duration: const Duration(seconds: 1),
-              backgroundColor: Colors.grey[800],
-            ),
-          );
-        } else if (index == 2) {
-          // Timer
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Timer - Coming soon!'),
-              duration: const Duration(seconds: 1),
-              backgroundColor: Colors.grey[800],
-            ),
-          );
-        }
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
