@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'add_alarm_page.dart';
 import 'alarm_ringing_page.dart';
 import 'stopwatch_page.dart';
+import 'timer_page.dart';
 import '../services/alarm_service.dart';
-import '../main.dart';
 
 class AlarmInfo {
   final String time;
@@ -253,7 +253,16 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          _buildTimerPage(),
+          TimerPage(
+            selectedIndex: _selectedTabIndex,
+            onNavigate: (index) {
+              _pageController.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+          ),
         ],
       ),
     );
@@ -361,40 +370,6 @@ class _HomePageState extends State<HomePage> {
                 child: const Icon(Icons.add, color: Colors.white, size: 28),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimerPage() {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text(
-          'Timer',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          const Center(
-            child: Text(
-              'Timer - Coming soon!',
-              style: TextStyle(color: Colors.white70, fontSize: 18),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _buildBottomNavigation(),
           ),
         ],
       ),
