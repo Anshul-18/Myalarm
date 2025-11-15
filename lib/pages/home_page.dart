@@ -104,6 +104,7 @@ class _HomePageState extends State<HomePage> {
           'Time to wake up!',
           alarms[index].scheduledTime,
           ringtoneUri: alarms[index].ringtoneUri,
+          displayTime: '${alarms[index].time} ${alarms[index].period}',
         );
       } else {
         AlarmService.cancelAlarm(alarms[index].id);
@@ -116,6 +117,61 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       alarms.removeAt(index);
     });
+  }
+
+  void _editAlarm(int index) async {
+    final alarm = alarms[index];
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddAlarmPage(
+          existingAlarm: {
+            'time': alarm.time,
+            'period': alarm.period,
+            'scheduledTime': alarm.scheduledTime,
+            'ringtoneUri': alarm.ringtoneUri,
+          },
+        ),
+      ),
+    );
+    
+    if (result != null && result is Map<String, dynamic>) {
+      // Cancel old alarm first
+      await AlarmService.cancelAlarm(alarm.id);
+      
+      // Update alarm
+      setState(() {
+        alarms[index] = AlarmInfo(
+          time: result['time']!,
+          period: result['period']!,
+          id: alarm.id, // Keep same ID
+          scheduledTime: result['scheduledTime'] as DateTime,
+          ringtoneUri: result['ringtoneUri'] as String?,
+          isEnabled: true,
+        );
+      });
+      
+      // Schedule updated alarm with the new time
+      final scheduledTime = result['scheduledTime'] as DateTime;
+      if (scheduledTime.isAfter(DateTime.now())) {
+        await AlarmService.scheduleAlarm(
+          alarm.id,
+          'Alarm',
+          'Time to wake up!',
+          scheduledTime,
+          ringtoneUri: result['ringtoneUri'] as String?,
+          displayTime: '${result['time']} ${result['period']}',
+        );
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Alarm updated'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.grey[800],
+        ),
+      );
+    }
   }
 
   void _showDeleteAllDialog() {
@@ -304,6 +360,9 @@ class _HomePageState extends State<HomePage> {
         onLongPress: () {
           _showAlarmOptions(index);
         },
+        onTap: () {
+          _editAlarm(index);
+        },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           padding: const EdgeInsets.all(16),
@@ -386,7 +445,7 @@ class _HomePageState extends State<HomePage> {
                 title: const Text('Edit', style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Navigator.pop(context);
-                  // Future enhancement: Edit alarm
+                  _editAlarm(index);
                 },
               ),
               ListTile(

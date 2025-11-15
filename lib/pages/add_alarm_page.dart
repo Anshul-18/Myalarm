@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AddAlarmPage extends StatefulWidget {
-  const AddAlarmPage({super.key});
+  final Map<String, dynamic>? existingAlarm;
+  
+  const AddAlarmPage({super.key, this.existingAlarm});
 
   @override
   _AddAlarmPageState createState() => _AddAlarmPageState();
@@ -19,8 +21,32 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
 
   @override
   void initState() {
-    _selectedTime = TimeOfDay.now();
     super.initState();
+    
+    if (widget.existingAlarm != null) {
+      // Load existing alarm data
+      final time = widget.existingAlarm!['time'] as String;
+      final period = widget.existingAlarm!['period'] as String;
+      final parts = time.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      
+      // Convert to 24-hour format
+      int hour24 = hour;
+      if (period == 'PM' && hour != 12) {
+        hour24 = hour + 12;
+      } else if (period == 'AM' && hour == 12) {
+        hour24 = 0;
+      }
+      
+      _selectedTime = TimeOfDay(hour: hour24, minute: minute);
+      _selectedRingtoneUri = widget.existingAlarm!['ringtoneUri'] as String?;
+      if (_selectedRingtoneUri != null) {
+        _ringtoneName = 'Custom ringtone';
+      }
+    } else {
+      _selectedTime = TimeOfDay.now();
+    }
   }
 
   @override
@@ -34,9 +60,9 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Add alarm',
-          style: TextStyle(
+        title: Text(
+          widget.existingAlarm != null ? 'Edit alarm' : 'Add alarm',
+          style: const TextStyle(
             fontSize: 20,
             color: Colors.white,
           ),
