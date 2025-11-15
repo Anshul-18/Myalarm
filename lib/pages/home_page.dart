@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'add_alarm_page.dart';
+import 'alarm_ringing_page.dart';
 import '../services/alarm_service.dart';
+import '../main.dart';
 
 class AlarmInfo {
   final String time;
@@ -8,6 +11,7 @@ class AlarmInfo {
   bool isEnabled;
   final int id;
   final DateTime scheduledTime;
+  final String? ringtoneUri;
 
   AlarmInfo({
     required this.time,
@@ -15,6 +19,7 @@ class AlarmInfo {
     this.isEnabled = true,
     required this.id,
     required this.scheduledTime,
+    this.ringtoneUri,
   });
 }
 
@@ -28,14 +33,44 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<AlarmInfo> alarms = [];
   int _selectedTabIndex = 0;
+  static const platform = MethodChannel('flutter_alarmapp/alarm');
 
   @override
   void initState() {
     super.initState();
     AlarmService.initialize();
+    _setupAlarmListener();
   }
 
-  void _addAlarm(String time, String period, DateTime scheduledTime) {
+  void _setupAlarmListener() {
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'showAlarmRinging') {
+        final int alarmId = call.arguments['alarmId'] ?? 0;
+        final String time = call.arguments['time'] ?? 'Alarm';
+        
+        // Find the alarm to get its time
+        AlarmInfo? alarm;
+        try {
+          alarm = alarms.firstWhere((a) => a.id == alarmId);
+        } catch (e) {
+          alarm = null;
+        }
+        
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AlarmRingingPage(
+                alarmId: alarmId,
+                time: alarm?.time ?? time,
+              ),
+            ),
+          );
+        }
+      }
+    });
+  }
+
+  void _addAlarm(String time, String period, DateTime scheduledTime, {String? ringtoneUri}) {
     setState(() {
       final id = DateTime.now().millisecondsSinceEpoch % 100000;
       alarms.add(AlarmInfo(
@@ -43,6 +78,7 @@ class _HomePageState extends State<HomePage> {
         period: period,
         id: id,
         scheduledTime: scheduledTime,
+        ringtoneUri: ringtoneUri,
       ));
 
       if (scheduledTime.isAfter(DateTime.now())) {
@@ -51,6 +87,8 @@ class _HomePageState extends State<HomePage> {
           'Alarm',
           'Time to wake up!',
           scheduledTime,
+          ringtoneUri: ringtoneUri,
+          displayTime: '$time $period',
         );
       }
     });
@@ -65,6 +103,7 @@ class _HomePageState extends State<HomePage> {
           'Alarm',
           'Time to wake up!',
           alarms[index].scheduledTime,
+          ringtoneUri: alarms[index].ringtoneUri,
         );
       } else {
         AlarmService.cancelAlarm(alarms[index].id);
@@ -183,45 +222,56 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: alarms.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No alarms',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: alarms.length,
-                    itemBuilder: (context, index) {
-                      return _buildAlarmCard(index);
-                    },
-                  ),
+          Column(
+            children: [
+              Expanded(
+                child: alarms.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No alarms',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                        itemCount: alarms.length,
+                        itemBuilder: (context, index) {
+                          return _buildAlarmCard(index);
+                        },
+                      ),
+              ),
+              _buildBottomNavigation(),
+            ],
           ),
-          _buildBottomNavigation(),
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FloatingActionButton(
+                backgroundColor: Colors.blue,
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AddAlarmPage()),
+                  );
+                  if (result != null && result is Map<String, dynamic>) {
+                    _addAlarm(
+                      result['time']!,
+                      result['period']!,
+                      result['scheduledTime'] as DateTime,
+                      ringtoneUri: result['ringtoneUri'] as String?,
+                    );
+                  }
+                },
+                child: const Icon(Icons.add, color: Colors.white, size: 28),
+              ),
+            ),
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddAlarmPage()),
-          );
-          if (result != null && result is Map<String, dynamic>) {
-            _addAlarm(
-              result['time']!,
-              result['period']!,
-              result['scheduledTime'] as DateTime,
-            );
-          }
-        },
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 

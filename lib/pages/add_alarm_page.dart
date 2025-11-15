@@ -1,5 +1,6 @@
 import 'package:flutter_alarmapp/widgets/circle_day.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddAlarmPage extends StatefulWidget {
   const AddAlarmPage({super.key});
@@ -13,6 +14,8 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
   bool _notificationEnabled = true;
   bool _vibrateEnabled = true;
   final List<bool> _selectedDays = [true, true, true, true, true, false, false]; // Mon-Sun
+  String? _selectedRingtoneUri;
+  String _ringtoneName = 'Default alarm sound';
 
   @override
   void initState() {
@@ -122,6 +125,20 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
                 },
               ),
               const Divider(color: Colors.white30, height: 1),
+              ListTile(
+                leading: const Icon(Icons.music_note, color: Colors.white),
+                title: const Text(
+                  'Alarm sound',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                subtitle: Text(
+                  _ringtoneName,
+                  style: const TextStyle(color: Colors.white60, fontSize: 14),
+                ),
+                trailing: const Icon(Icons.chevron_right, color: Colors.white60),
+                onTap: _selectRingtone,
+              ),
+              const Divider(color: Colors.white30, height: 1),
               const SizedBox(height: 40),
             ],
           ),
@@ -140,6 +157,32 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
       setState(() {
         _selectedTime = picked;
       });
+    }
+  }
+
+  Future<void> _selectRingtone() async {
+    try {
+      // Use platform channel to open Android's ringtone picker
+      const platform = MethodChannel('flutter_alarmapp/ringtone');
+      final String? result = await platform.invokeMethod('pickRingtone');
+      
+      if (result != null) {
+        setState(() {
+          _selectedRingtoneUri = result;
+          // Extract ringtone name from URI or use a default name
+          final uriParts = result.split('/');
+          _ringtoneName = uriParts.isNotEmpty ? uriParts.last : 'Selected ringtone';
+        });
+      }
+    } on PlatformException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting ringtone: ${e.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -170,6 +213,7 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
       'time': time,
       'period': period,
       'scheduledTime': scheduledTime,
+      'ringtoneUri': _selectedRingtoneUri,
     });
   }
 }
