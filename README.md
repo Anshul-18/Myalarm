@@ -56,6 +56,8 @@ A fully-featured alarm, timer, and stopwatch application built with Flutter for 
 - **Min SDK**: 21 (Android 5.0)
 - **Target SDK**: 34 (Android 14)
 
+Note: I Recommend users to use java 17 to build.
+
 ### Key Components
 
 #### Method Channels
