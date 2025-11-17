@@ -176,6 +176,32 @@ flutter build apk --release
 
 The APK will be located at: `build/app/outputs/flutter-apk/app-release.apk`
 
+## Running the Provided APK
+
+If you already have the compiled APK file (for example `MyAlarm.apk` or `app-release.apk`) you can install and run the app on an Android device without building the project.
+
+- **On the device (recommended for non-developers):**
+  - Copy the APK to your Android device (via USB, email, cloud storage, etc.).
+  - On the device, open the APK file with a file manager to install it.
+  - If prompted, enable `Install unknown apps` (or allow the installing app permission) for the app you used to open the APK.
+  - After installation, open the app from your launcher.
+
+- **Using ADB (developer-friendly):**
+  - Connect your device to your computer with USB and enable USB debugging in Developer Options.
+  - From this repository folder (or the folder containing the APK) run:
+
+```powershell
+adb install -r .\MyAlarm.apk
+# or, if the file is named differently, replace with the correct name:
+adb install -r .\app-release.apk
+```
+
+- **Permissions & Notes:**
+  - Grant the app notification and other runtime permissions when prompted so alarms and timers can notify you correctly.
+  - On newer Android versions you may need to allow the app to post notifications and use exact alarms. Go to the app settings after installing to enable these if needed.
+  - If you see a failure like `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, uninstall any previously installed debug/release variants of the app and retry.
+
+Replace `MyAlarm.apk` with the actual APK filename you were provided. If you want, you can add the APK file to this repository under an `apk/` folder so others can download it easily.
 ## Platform Support
 
 - ✅ Android (Fully supported)
