@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_alarmapp/services/notification_service.dart';
 import 'package:flutter_alarmapp/pages/home_page.dart';
-import 'package:flutter_alarmapp/pages/alarm_ringing_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -33,10 +33,10 @@ class TimerPageState extends State<TimerPage> with AutomaticKeepAliveClientMixin
   bool _isRunning = false;
   bool _isPaused = false;
   static const platform = MethodChannel('flutter_alarmapp/alarm');
-  TextEditingController _hoursController = TextEditingController(text: '00');
-  TextEditingController _minutesController = TextEditingController(text: '00');
-  TextEditingController _secondsController = TextEditingController(text: '00');
-  List<TimerInfo> _savedTimers = [
+  final TextEditingController _hoursController = TextEditingController(text: '00');
+  final TextEditingController _minutesController = TextEditingController(text: '00');
+  final TextEditingController _secondsController = TextEditingController(text: '00');
+  final List<TimerInfo> _savedTimers = [
     TimerInfo(name: 'Facial mask', seconds: 900, id: 1), // 15 min
     TimerInfo(name: 'Boil eggs', seconds: 600, id: 2), // 10 min
     TimerInfo(name: 'Timer', seconds: 3001, id: 3), // 50 min 1 sec
@@ -127,7 +127,7 @@ class TimerPageState extends State<TimerPage> with AutomaticKeepAliveClientMixin
   void _showTimerEndedPage() async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => TimerEndedPage(
+        builder: (context) => const TimerEndedPage(
           timerName: 'Timer',
         ),
       ),
@@ -858,8 +858,9 @@ class TimerPageState extends State<TimerPage> with AutomaticKeepAliveClientMixin
             onChanged: (text) {
               if (text.isEmpty) {
                 setState(() {
-                  if (type == 'hours') _hours = 0;
-                  else if (type == 'minutes') _minutes = 0;
+                  if (type == 'hours') {
+                    _hours = 0;
+                  } else if (type == 'minutes') _minutes = 0;
                   else _seconds = 0;
                 });
                 return;

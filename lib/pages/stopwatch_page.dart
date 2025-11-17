@@ -310,7 +310,7 @@ class StopwatchPainter extends CustomPainter {
     final smallSecondAngle = ((smallSeconds % 30) * 12 - 90) * 3.14159 / 180;
     
     final smallCircleCenter = Offset(center.dx, center.dy + 80);
-    final smallRadius = 30.0;
+    const smallRadius = 30.0;
     
     // Small circle background
     final smallCircleBgPaint = Paint()
@@ -329,8 +329,8 @@ class StopwatchPainter extends CustomPainter {
     for (int i = 0; i < 30; i++) {
       if (i % 5 == 0) {
         final tickAngle = (i * 12 - 90) * 3.14159 / 180;
-        final tickStart = 25.0;
-        final tickEnd = 28.0;
+        const tickStart = 25.0;
+        const tickEnd = 28.0;
         
         final startX = smallCircleCenter.dx + tickStart * math.cos(tickAngle);
         final startY = smallCircleCenter.dy + tickStart * math.sin(tickAngle);
@@ -350,7 +350,7 @@ class StopwatchPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
 
-    final smallHandLength = 20.0;
+    const smallHandLength = 20.0;
     final smallHandEndX = smallCircleCenter.dx + smallHandLength * math.cos(smallSecondAngle);
     final smallHandEndY = smallCircleCenter.dy + smallHandLength * math.sin(smallSecondAngle);
 

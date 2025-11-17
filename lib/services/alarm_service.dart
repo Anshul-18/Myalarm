@@ -18,7 +18,7 @@ class AlarmService {
       requestSoundPermission: true,
     );
     
-    final initializationSettings = InitializationSettings(
+    const initializationSettings = InitializationSettings(
       android: androidSettings,
       iOS: darwinSettings,
     );
@@ -52,7 +52,7 @@ class AlarmService {
       title,
       body,
       tz.TZDateTime.from(scheduledTime, tz.local),
-      NotificationDetails(
+      const NotificationDetails(
         android: AndroidNotificationDetails(
           'alarm_channel',
           'Alarms',
@@ -66,14 +66,14 @@ class AlarmService {
           ongoing: true,
           autoCancel: false,
           actions: <AndroidNotificationAction>[
-            const AndroidNotificationAction(
+            AndroidNotificationAction(
               'dismiss',
               'Dismiss',
               cancelNotification: true,
             ),
           ],
         ),
-        iOS: const DarwinNotificationDetails(
+        iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,

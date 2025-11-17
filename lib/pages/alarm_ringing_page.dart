@@ -62,10 +62,10 @@ class _AlarmRingingPageState extends State<AlarmRingingPage>
     if (mounted) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Alarm snoozed for 10 minutes'),
+        const SnackBar(
+          content: Text('Alarm snoozed for 10 minutes'),
           backgroundColor: Colors.blue,
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         ),
       );
     }
